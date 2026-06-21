@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store";
-import { api, setAccessToken } from "./api";
+import { api, setAccessToken, setRefreshHandler } from "./api";
 
 export type Tokens = { access: string; refresh: string };
 export type User = { id: string; email: string; name: string; email_verified: boolean; avatar_key: string };
@@ -34,6 +34,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [status, setStatus] = useState<AuthState["status"]>("loading");
 
   useEffect(() => {
+    // Renew the access token via the refresh token. Registered with the api
+    // layer so its 401 interceptor can transparently retry expired requests.
+    const refreshAccessToken = async (): Promise<string | null> => {
+      const t = await tokenStore.get();
+      if (!t?.refresh) { await signOut(); return null; }
+      try {
+        const { data } = await api.post<{ access: string }>("/auth/refresh/", { refresh: t.refresh });
+        const next = { access: data.access, refresh: t.refresh };
+        await tokenStore.save(next);
+        setAccessToken(next.access);
+        return next.access;
+      } catch {
+        await signOut();
+        return null;
+      }
+    };
+    setRefreshHandler(refreshAccessToken);
+
     (async () => {
       const t = await tokenStore.get();
       if (!t) { setStatus("signedOut"); return; }
@@ -45,6 +63,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await tokenStore.clear(); setAccessToken(null); setStatus("signedOut");
       }
     })();
+
+    return () => setRefreshHandler(null);
   }, []);
 
   const signIn = async (t: Tokens, u: User) => {
