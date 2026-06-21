@@ -111,11 +111,10 @@ export function useSubmitPayment(groupId: string) {
         form.append("proof", { uri: imageUri, name: filename, type } as any);
       }
 
-      return (
-        await api.post<Payment>(`/groups/${groupId}/payments/`, form, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-      ).data;
+      // Do NOT set Content-Type here: React Native/axios must set
+      // "multipart/form-data; boundary=..." itself. A manual header without the
+      // boundary makes the backend reject the body (every field "required").
+      return (await api.post<Payment>(`/groups/${groupId}/payments/`, form)).data;
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["my-payments", groupId] });

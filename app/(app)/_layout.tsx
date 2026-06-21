@@ -21,6 +21,11 @@ function AppLayoutInner() {
       <Tabs.Screen name="haazri" options={{ href: null }} />
       <Tabs.Screen name="my-haazri" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
+      <Tabs.Screen name="standing" options={{ href: null }} />
+      <Tabs.Screen name="activity" options={{ href: null }} />
+      <Tabs.Screen name="settlement" options={{ href: null }} />
+      <Tabs.Screen name="my-payments" options={{ href: null }} />
+      <Tabs.Screen name="payment-approvals" options={{ href: null }} />
     </Tabs>
   );
 }

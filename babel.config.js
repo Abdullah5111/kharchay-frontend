@@ -1,12 +1,8 @@
 module.exports = function (api) {
   api.cache(true);
-  const isTest = process.env.NODE_ENV === "test";
-  if (isTest) {
-    return {
-      presets: [["babel-preset-expo", { jsxImportSource: "nativewind" }]],
-    };
-  }
+  // NativeWind v4 uses jsxImportSource + the metro plugin (see metro.config.js);
+  // the v2-era "nativewind/babel" preset was removed and breaks bundling.
   return {
-    presets: [["babel-preset-expo", { jsxImportSource: "nativewind" }], "nativewind/babel"],
+    presets: [["babel-preset-expo", { jsxImportSource: "nativewind" }]],
   };
 };
